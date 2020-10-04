@@ -10,27 +10,32 @@ public class CardManager : MonoBehaviour
 	public int columns;         // # of columns of the board
 	public float rowGap;
 	public float columnGap;
-	public GameObject[] deck;   // size of 40, filled with each card of each type
+	public GameObject[] deck;   // size of 40, filled with cards of each type and value
 
 	// Fields set at Start()
 	public GameObject[,] board;
 	public GameObject selectedGameObj;
 	public GameObject prevSelectedGameObj;
-	GameObject cardBoard;
 	public bool match;
+	GameObject cardBoard;
+	float cardWidth;
+	float cardHeight;
 
 	// Start is called before the first frame update
 	void Start()
 	{
 		board = new GameObject[rows,columns];
-		cardBoard = new GameObject("board");
 		match = false;
+
+		cardBoard = new GameObject("board");
+		cardWidth = deck[0].GetComponent<BoxCollider>().size.x;
+		cardHeight = deck[0].GetComponent<BoxCollider>().size.y;
 
 		// if the array has capacity, it is filled and the board is displayed
 		if(rows + columns > 0) 
 		{
 			PopulateCardArray(CreateRandomCardArray(rows,columns));
-			// PopulateCardArray(CreateStandardCardArray(rows, columns));
+			// PopulateCardArray(CreateStandardCardArray(rows, columns)); 
 		
 			DisplayBoard();
 		}
@@ -56,17 +61,17 @@ public class CardManager : MonoBehaviour
 				GameObject newGO = Instantiate(
 					board[r,c],
 					new Vector3(
-						c + c * columnGap,
-						r + r * rowGap),
+						c + c * columnGap + cardWidth / 2,
+						r + r * rowGap + cardHeight / 2),
 					Quaternion.identity);
 				newGO.transform.parent = cardBoard.transform;
 			}
 		}
 
 		// Calculate shift and move the main camera that amount
-		float newX = (columns * (1 + columnGap)) / 2;
-		float newY = (rows * (1 + rowGap)) / 2;
-		gameObject.GetComponent<GameManager>().ShiftCamera(Camera.main,new Vector3(newX,newY));
+		float xOffset = ((columns - 1) * (1 + columnGap) + cardWidth) / 2;
+		float yOffset = ((rows - 1) * (1 + rowGap) + cardHeight) / 2;
+		gameObject.GetComponent<GameManager>().ShiftCamera(Camera.main,new Vector3(xOffset, yOffset));
 	}
 
 	/// <summary>
