@@ -26,11 +26,14 @@ public class CardManager : MonoBehaviour
 		cardBoard = new GameObject("board");
 		match = false;
 
-		PopulateCardArray(CreateRandomCardArray(rows,columns));
-		// PopulateCardArray(CreateStandardCardArray(rows, columns));
-
-		if(board[0,0] != null)
+		// if the array has capacity, it is filled and the board is displayed
+		if(rows + columns > 0) 
+		{
+			PopulateCardArray(CreateRandomCardArray(rows,columns));
+			// PopulateCardArray(CreateStandardCardArray(rows, columns));
+		
 			DisplayBoard();
+		}
 	}
 
 	// Update is called once per frame
@@ -126,7 +129,6 @@ public class CardManager : MonoBehaviour
 				//Debug.Log(cardArray[r,c].GetComponent<Card>().ToString());
 
 				cardCount++;
-
 				if(cardCount == deck.Length)
 					cardCount = 0;
 			}
@@ -184,12 +186,12 @@ public class CardManager : MonoBehaviour
 	}
 
 	/// <summary>
-	/// Compares 2 cards and returns whether they are a match
+	/// Compares 2 cards and returns whether they are 
+	/// a match based on a number of criteria
 	/// </summary>
 	/// <param name="card1">The first gameObj being compared</param>
 	/// <param name="card2">The second gameObj being compared</param>
-	/// <returns>Returns whether the 2 cards are adjacent in both 
-	/// location and value, as well as being the same type</returns>
+	/// <returns>Returns whether the 2 cards are a match</returns>
 	bool isMatch(GameObject card1,GameObject card2)
 	{
 		// Checks that both gameObjects are cards
@@ -199,42 +201,17 @@ public class CardManager : MonoBehaviour
 			return false;
 		}
 
-		//// Check location of cards
-		//if((Mathf.Abs(card1.GetComponent<Card>().row
-		//	- card2.GetComponent<Card>().row) != 1)
-		//	&& (Mathf.Abs(card1.GetComponent<Card>().column
-		//	- card2.GetComponent<Card>().column) != 1))
-		//{
-		//	Debug.Log("Cards are not adjacent");
-		//	return false;
-		//}
-
-		// Check suit of cards
+		// Check the type of each card
 		if(card1.GetComponent<Card>().type
 			!= card2.GetComponent<Card>().type) {
-			Debug.Log("Wrong suit");
+			Debug.Log("Wrong type");
 			return false;
 		}
 
-		// Check values of cards:
-		bool isRightValue = true;
-
-		// If the values are adjacent
-		if(Mathf.Abs(card1.GetComponent<Card>().value
-			- card2.GetComponent<Card>().value) == 1)
-			isRightValue = true;
-		// If the values are King and Ace ("wrap" back around)
-		else if(Mathf.Abs(card1.GetComponent<Card>().value
-			- card2.GetComponent<Card>().value) == 12)
-			isRightValue = true;
-		else
-			isRightValue = false;
-
-		if(!isRightValue) {
-			Debug.Log(card1.GetComponent<Card>().value + " and "
-				+ card2.GetComponent<Card>().value + " are not adjacent");
-			Debug.Log("Difference: " + (Mathf.Abs(card1.GetComponent<Card>().value
-				- card2.GetComponent<Card>().value)));
+		// Check the values each of card
+		if(card1.GetComponent<Card>().value
+			!= card2.GetComponent<Card>().value) {
+			Debug.Log("Not the same value");
 			return false;
 		}
 
