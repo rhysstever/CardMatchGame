@@ -12,14 +12,20 @@ public class CardManager : MonoBehaviour
 	public float columnGap;
 	public GameObject[] deck;   // size of 40, filled with cards of each type and value
 
+	// Materials
+	public Material brownMat;
+
 	// Fields set at Start()
 	public GameObject[,] board;
 	public GameObject selectedGameObj;
 	public GameObject prevSelectedGameObj;
 	public bool match;
+	GameObject boardBG;
 	GameObject cardBoard;
 	float cardWidth;
 	float cardHeight;
+	float xOffset;
+	float yOffset;
 
 	// Start is called before the first frame update
 	void Start()
@@ -27,9 +33,12 @@ public class CardManager : MonoBehaviour
 		board = new GameObject[rows,columns];
 		match = false;
 
-		cardBoard = new GameObject("board");
+		boardBG = GameObject.CreatePrimitive(PrimitiveType.Cube);
+		cardBoard = new GameObject("cards");
 		cardWidth = deck[0].GetComponent<BoxCollider>().size.x;
 		cardHeight = deck[0].GetComponent<BoxCollider>().size.y;
+		xOffset = ((columns - 1) * (1 + columnGap) + cardWidth) / 2;
+		yOffset = ((rows - 1) * (1 + rowGap) + cardHeight) / 2;
 
 		// if the array has capacity, it is filled and the board is displayed
 		if(rows + columns > 0) 
@@ -38,6 +47,8 @@ public class CardManager : MonoBehaviour
 			// PopulateCardArray(CreateStandardCardArray(rows, columns)); 
 		
 			DisplayBoard();
+			boardBG.name = "Board";
+			boardBG.GetComponent<MeshRenderer>().material = brownMat;
 		}
 	}
 
@@ -46,7 +57,6 @@ public class CardManager : MonoBehaviour
 	{
 		if(Input.GetMouseButtonDown(0)) {
 			GameObjClicked();
-			CheckForMatches();
 		}
 	}
 
@@ -68,10 +78,16 @@ public class CardManager : MonoBehaviour
 			}
 		}
 
-		// Calculate shift and move the main camera that amount
-		float xOffset = ((columns - 1) * (1 + columnGap) + cardWidth) / 2;
-		float yOffset = ((rows - 1) * (1 + rowGap) + cardHeight) / 2;
-		gameObject.GetComponent<GameManager>().ShiftCamera(Camera.main,new Vector3(xOffset, yOffset));
+		// Shift the main camera that amount
+		// Move and scale the board background gameObj
+		gameObject.GetComponent<GameManager>().ShiftCamera(Camera.main,new Vector3(xOffset,yOffset));
+		ResizeBoard();
+	}
+
+	void ResizeBoard()
+	{
+		boardBG.transform.position = new Vector3(xOffset,yOffset,3);
+		boardBG.transform.localScale = new Vector3(xOffset * 2 + cardWidth,yOffset * 2 + cardHeight,1);
 	}
 
 	/// <summary>
@@ -156,15 +172,16 @@ public class CardManager : MonoBehaviour
 		RaycastHit rayHit;
 
 		// If the ray interects with something in the scene 
-		if(Physics.Raycast(ray,out rayHit,Mathf.Infinity,layerMask)) {
-			// If there is already a selected gameObj, 
-			// then the already selected gameObj is "saved" 
-			// as the previous selected gameObj and the newly
-			// selected gameObj is assigned
+		if(Physics.Raycast(ray,out rayHit,Mathf.Infinity,layerMask)
+			&& rayHit.transform.gameObject.name != "Board") {
+			// If a selected gameObj already exists, 
+			// then it is "saved" as the previous selected gameObj
 			if(selectedGameObj != null)
 				prevSelectedGameObj = selectedGameObj;
 
+			// Clicked gameObj is assigned
 			selectedGameObj = rayHit.transform.gameObject;
+			CheckForMatches();
 		}
 		// Not clicking on anything will unselect both selected gameObjects
 		else {
@@ -186,8 +203,11 @@ public class CardManager : MonoBehaviour
 				match = true;
 				RemoveMatch(selectedGameObj,prevSelectedGameObj);
 			}
-			else
+			else {
 				match = false;
+				prevSelectedGameObj = null;
+				selectedGameObj = null;
+			}
 	}
 
 	/// <summary>
@@ -205,6 +225,12 @@ public class CardManager : MonoBehaviour
 			Debug.Log("These are not cards");
 			return false;
 		}
+
+		// Checks that both gameObjects are unique
+		if(card1 == card2) { 
+			Debug.Log("These are the same object");
+			return false;
+		}	
 
 		// Check the type of each card
 		if(card1.GetComponent<Card>().type
