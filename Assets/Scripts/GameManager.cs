@@ -2,19 +2,48 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum GameState
+{
+	MainMenu,
+	Instructions,
+	Game,
+	Pause,
+	End
+}
+
 public class GameManager : MonoBehaviour
 {
-    // Start is called before the first frame update
+	public GameState currentGameState;
+	public bool isWon;
+	
+	// Start is called before the first frame update
     void Start()
     {
-        
-    }
+		currentGameState = GameState.Game;
+		isWon = false;
+	}
 
     // Update is called once per frame
     void Update()
     {
         
     }
+
+	public void ChangeGameState(GameState newGameState)
+	{
+		switch(newGameState) {
+			case GameState.MainMenu:
+				break;
+			case GameState.Instructions:
+				break;
+			case GameState.Game:
+				break;
+			case GameState.Pause:
+				break;
+			case GameState.End:
+				break;
+		}
+	}
 
 	/// <summary>
 	/// Shifts the given camera by a given vec3

@@ -24,8 +24,6 @@ public class CardManager : MonoBehaviour
 	GameObject cardBoard;
 	float cardWidth;
 	float cardHeight;
-	float xOffset;
-	float yOffset;
 
 	// Start is called before the first frame update
 	void Start()
@@ -37,8 +35,6 @@ public class CardManager : MonoBehaviour
 		cardBoard = new GameObject("cards");
 		cardWidth = deck[0].GetComponent<BoxCollider>().size.x;
 		cardHeight = deck[0].GetComponent<BoxCollider>().size.y;
-		xOffset = ((columns - 1) * (1 + columnGap) + cardWidth) / 2;
-		yOffset = ((rows - 1) * (1 + rowGap) + cardHeight) / 2;
 
 		// if the array has capacity, it is filled and the board is displayed
 		if(rows + columns > 0) 
@@ -78,14 +74,19 @@ public class CardManager : MonoBehaviour
 			}
 		}
 
-		// Shift the main camera that amount
-		// Move and scale the board background gameObj
-		gameObject.GetComponent<GameManager>().ShiftCamera(Camera.main,new Vector3(xOffset,yOffset));
-		ResizeBoard();
+		// Center the cam and board 
+		CenterView();
 	}
 
-	void ResizeBoard()
+	/// <summary>
+	/// Centers the board and cam and resizes to be around all of the cards 
+	/// </summary>
+	void CenterView()
 	{
+		float xOffset = ((columns - 1) * (1 + columnGap) + cardWidth) / 2;
+		float yOffset = ((rows - 1) * (1 + rowGap) + cardHeight) / 2;
+
+		gameObject.GetComponent<GameManager>().ShiftCamera(Camera.main,new Vector3(xOffset,yOffset));
 		boardBG.transform.position = new Vector3(xOffset,yOffset,3);
 		boardBG.transform.localScale = new Vector3(xOffset * 2 + cardWidth,yOffset * 2 + cardHeight,1);
 	}
@@ -264,5 +265,22 @@ public class CardManager : MonoBehaviour
 		selectedGameObj = null;
 		prevSelectedGameObj = null;
 		match = false;
+
+		// Check for end of game
+		CheckVictory();
+	}
+
+	/// <summary>
+	/// If the board has been cleared, the game state to the end state
+	/// </summary>
+	void CheckVictory()
+	{
+		// If the board is empty, it sets isWon to true and
+		// to changes the gameState to the end state
+		if(board.GetLongLength(0) == 0
+			&& board.GetLongLength(1) == 0) {
+			gameObject.GetComponent<GameManager>().ChangeGameState(GameState.End);
+			gameObject.GetComponent<GameManager>().isWon = true;
+		}
 	}
 }
