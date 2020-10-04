@@ -328,10 +328,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 84666d0c74c28584496bc36c77f0df1f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rows: 4
-  columns: 4
-  rowGap: 1
-  columnGap: 1
+  rows: 6
+  columns: 6
+  rowGap: 0.5
+  columnGap: 0.5
   deck:
   - {fileID: 1154797527510213602, guid: 22effb90fe1163540a0037e91fce6103, type: 3}
   - {fileID: 9000714336043765878, guid: dfc422ee2efd37846ba406e44e7e61aa, type: 3}
@@ -340,6 +340,7 @@ MonoBehaviour:
   selectedGameObj: {fileID: 0}
   prevSelectedGameObj: {fileID: 0}
   match: 0
+  brownMat: {fileID: 2100000, guid: 97ce9f33e55d16b46a39ed891496b464, type: 2}
 --- !u!114 &790147635
 MonoBehaviour:
   m_ObjectHideFlags: 0
