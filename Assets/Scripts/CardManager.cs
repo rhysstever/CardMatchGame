@@ -175,13 +175,22 @@ public class CardManager : MonoBehaviour
 		// If the ray interects with something in the scene 
 		if(Physics.Raycast(ray,out rayHit,Mathf.Infinity,layerMask)
 			&& rayHit.transform.gameObject.name != "Board") {
+
+			// Finds the clicked gameObj
+			GameObject hitGameObj = rayHit.transform.gameObject;
+
+			// If the clicked gameObj has a parent, then the 
+			// parent becomes the selected gameObj
+			if(hitGameObj.transform.parent.GetComponent<Card>() != null)
+				hitGameObj = hitGameObj.transform.parent.gameObject;
+
 			// If a selected gameObj already exists, 
 			// then it is "saved" as the previous selected gameObj
 			if(selectedGameObj != null)
 				prevSelectedGameObj = selectedGameObj;
 
 			// Clicked gameObj is assigned
-			selectedGameObj = rayHit.transform.gameObject;
+			selectedGameObj = hitGameObj;
 			CheckForMatches();
 		}
 		// Not clicking on anything will unselect both selected gameObjects
