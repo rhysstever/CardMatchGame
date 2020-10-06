@@ -13,16 +13,10 @@ public enum CardType
 
 public enum CardValue
 {
-    One = 1,
+    Zero,
+    One,
     Two,
-    Three,
-    Four,
-    Five,
-    Six,
-    Seven,
-    Eight,
-    Nine,
-    Ten
+    Three
 }
 
 public class Card : MonoBehaviour
@@ -30,6 +24,8 @@ public class Card : MonoBehaviour
     // Fields set in inspector
     public CardValue value;
     public CardType type;
+
+
     public int row;
     public int column;
 

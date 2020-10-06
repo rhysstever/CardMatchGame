@@ -333,14 +333,22 @@ MonoBehaviour:
   rowGap: 0.5
   columnGap: 0.5
   deck:
-  - {fileID: 1154797527510213602, guid: 22effb90fe1163540a0037e91fce6103, type: 3}
-  - {fileID: 9000714336043765878, guid: dfc422ee2efd37846ba406e44e7e61aa, type: 3}
-  - {fileID: 2243464286941883095, guid: d588dc6aed839b4449b4bb21bbeea0a6, type: 3}
-  - {fileID: 1995372104921893378, guid: b3648781d69e1eb438c5c909d1bae50f, type: 3}
+  - {fileID: 1154797527510213602, guid: 5a8eba8547ba8f847bf97c4cd62d4216, type: 3}
+  - {fileID: 1154797527510213602, guid: 1beda82005be04041ac4631bd8e409f8, type: 3}
+  - {fileID: 1154797527510213602, guid: 7e682f3df8b39f2418198b8999af2284, type: 3}
+  - {fileID: 1154797527510213602, guid: 465e2f85706956a4698273a0c77eecdd, type: 3}
+  - {fileID: 1154797527510213602, guid: c66d8115762497148b3067a1da591cb3, type: 3}
+  - {fileID: 1154797527510213602, guid: 6e26224beac38be4181c42041c0f0ba4, type: 3}
+  - {fileID: 1154797527510213602, guid: dbd389a421e76e847a20a548da52c853, type: 3}
+  - {fileID: 1154797527510213602, guid: b167d99ca3bc88a408b09a88100beef4, type: 3}
+  - {fileID: 1154797527510213602, guid: 30ccf80266d0a1445aa4e2f30490eec6, type: 3}
+  - {fileID: 1154797527510213602, guid: b5da8262a6487674fa0638c158d041a7, type: 3}
+  - {fileID: 1154797527510213602, guid: 5a2b579e52192eb4d8d2fe035c46f8dc, type: 3}
+  - {fileID: 1154797527510213602, guid: e30afb8d1296e5c469fe475be6df6869, type: 3}
+  brownMat: {fileID: 2100000, guid: 97ce9f33e55d16b46a39ed891496b464, type: 2}
   selectedGameObj: {fileID: 0}
   prevSelectedGameObj: {fileID: 0}
   match: 0
-  brownMat: {fileID: 2100000, guid: 97ce9f33e55d16b46a39ed891496b464, type: 2}
 --- !u!114 &790147635
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -353,6 +361,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2df9e04a0fff6d94e8906808151f2149, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  currentGameState: 0
+  isWon: 0
 --- !u!4 &790147636
 Transform:
   m_ObjectHideFlags: 0
