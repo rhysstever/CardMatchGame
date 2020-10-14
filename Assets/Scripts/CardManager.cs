@@ -8,108 +8,118 @@ public class CardManager : MonoBehaviour
 	// Fields set in inspector
 	public int rows;            // # of rows of the board
 	public int columns;         // # of columns of the board
-	public float rowGap;
-	public float columnGap;
 	public GameObject[] deck;   // size of 40, filled with cards of each type and value
 
-	// Materials
-	public Material brownMat;
-
 	// Fields set at Start()
-	public GameObject[,] board;
+	public GameObject[,] sceneBoard;
 	public GameObject selectedGameObj;
 	public GameObject prevSelectedGameObj;
 	public bool match;
-	GameObject boardBG;
-	GameObject cardBoard;
-	float cardWidth;
-	float cardHeight;
+	public int timesDoubled;
 
 	// Start is called before the first frame update
 	void Start()
 	{
-		board = new GameObject[rows,columns];
+		sceneBoard = new GameObject[rows,columns];
 		match = false;
-
-		boardBG = GameObject.CreatePrimitive(PrimitiveType.Cube);
-		cardBoard = new GameObject("cards");
-		cardWidth = deck[0].GetComponent<BoxCollider>().size.x;
-		cardHeight = deck[0].GetComponent<BoxCollider>().size.y;
+		timesDoubled = 0;
 
 		// if the array has capacity, it is filled and the board is displayed
 		if(rows + columns > 0) 
 		{
-			PopulateCardArray(CreateRandomCardArray(rows,columns));
-			// PopulateCardArray(CreateStandardCardArray(rows, columns)); 
-		
-			DisplayBoard();
-			boardBG.name = "Board";
-			boardBG.GetComponent<MeshRenderer>().material = brownMat;
+			sceneBoard = PopulateCardArray(CreateRandomCardArray(rows,columns), rows, columns);
+			// sceneBoard = PopulateCardArray(CreateStandardCardArray(rows,columns), rows, columns); 
+
+			if(sceneBoard != null) {
+				gameObject.GetComponent<BoardDisplayManager>().DisplayBoard(sceneBoard,"card board");
+				gameObject.GetComponent<BoardDisplayManager>().CenterView();
+			}
 		}
 	}
 
 	// Update is called once per frame
 	void Update()
 	{
-		if(Input.GetMouseButtonDown(0)) {
+		// Selects an object with the Left Mouse "Mouse1" click
+		if(Input.GetMouseButtonDown(0))
 			GameObjClicked();
+
+		// Doubles the board when "R" is pressed
+		if(Input.GetKeyDown(KeyCode.R)) {
+			sceneBoard = DoubleBoard(sceneBoard);
 		}
 	}
 
 	/// <summary>
-	/// Instantiates card gameObjs and adds them to a board parent object
+	/// Doubles all elements in a 2D array that are still active in the scene
 	/// </summary>
-	void DisplayBoard()
+	/// <param name="oldBoard">The old 2D array that will be doubled</param>
+	/// <returns>Returns the new 2D array</returns>
+	GameObject[,] DoubleBoard(GameObject[,] oldBoard)
 	{
-		// Loop through board, instantiating each gameObj with a gap
-		for(int r = 0; r < board.GetLength(0); r++) {
-			for(int c = 0; c < board.GetLength(1); c++) {
-				GameObject newGO = Instantiate(
-					board[r,c],
-					new Vector3(
-						c + c * columnGap + cardWidth / 2,
-						r + r * rowGap + cardHeight / 2),
-					Quaternion.identity);
-				newGO.transform.parent = cardBoard.transform;
+		// Creates a list to hold all active gameObjs from the 2D array "board" 
+		List<GameObject> remainingGameObjs = new List<GameObject>();
+
+		for(int r = 0; r < oldBoard.GetLength(0); r++) {
+			for(int c = 0; c < oldBoard.GetLength(1); c++) {
+				if(oldBoard[r,c] != null)
+					remainingGameObjs.Add(oldBoard[r,c]);
 			}
 		}
 
-		// Center the cam and board 
-		CenterView();
+		// Creates a new 2D array using the old 2D array and the newly created list
+		GameObject[,] newBoard = new GameObject[oldBoard.GetLength(0) + remainingGameObjs.Count,columns];
+
+		// Adds all elements from the old 2D array
+		for(int r = 0; r < oldBoard.GetLength(0); r++) {
+			for(int c = 0; c < oldBoard.GetLength(1); c++) {
+				newBoard[r,c] = oldBoard[r,c];
+			}
+		}
+
+		// Adds all elements from the list "doubling" all active elements
+		int index = 0;
+		for(int r = oldBoard.GetLength(0); r < newBoard.GetLength(0); r++) {
+			for(int c = oldBoard.GetLength(1); c < newBoard.GetLength(1); c++) {
+				if(newBoard[r,c] == null
+					&& index < remainingGameObjs.Count)
+					newBoard[r,c] = remainingGameObjs[index];
+			}
+		}
+
+		// Sets new row and column amount and displays the new board
+		rows = newBoard.GetLength(0);
+		columns = newBoard.GetLength(1);
+		gameObject.GetComponent<BoardDisplayManager>().DisplayBoard(newBoard,"Doubled Board");
+		timesDoubled++;
+		return newBoard;
 	}
 
 	/// <summary>
-	/// Centers the board and cam and resizes to be around all of the cards 
+	/// Fills a new 2D array with GameObjects from another array
 	/// </summary>
-	void CenterView()
+	/// <param name="oldArray">The old 2D array</param>
+	/// <param name="newRows">The number of rows of the new 2D array</param>
+	/// <param name="newColumns">The number of columns of the new 2D array</param>
+	/// <returns></returns>
+	GameObject[,] PopulateCardArray(GameObject[,] oldArray, int newRows, int newColumns)
 	{
-		float xOffset = ((columns - 1) * (1 + columnGap) + cardWidth) / 2;
-		float yOffset = ((rows - 1) * (1 + rowGap) + cardHeight) / 2;
-
-		gameObject.GetComponent<GameManager>().ShiftCamera(Camera.main,new Vector3(xOffset,yOffset));
-		boardBG.transform.position = new Vector3(xOffset,yOffset,3);
-		boardBG.transform.localScale = new Vector3(xOffset * 2 + cardWidth,yOffset * 2 + cardHeight,1);
-	}
-
-	/// <summary>
-	/// Fills the card array with strings from another array
-	/// </summary>
-	void PopulateCardArray(GameObject[,] givenArray)
-	{
-		// Checks if the given array is the same size as the card array
-		if(givenArray.GetLength(0) != rows
-			|| givenArray.GetLength(1) != columns) {
-			Debug.Log("Error! Array is the wrong size");
-			return;
+		// Checks if the new row and column size is too small
+		if(oldArray.GetLength(0) > newRows
+			|| oldArray.GetLength(1) > newColumns) {
+			Debug.Log("Error! New sizes are too small. The old array won't fit!");
+			return null;
 		}
 		else {
-			for(int r = 0; r < rows; r++) {
-				for(int c = 0; c < columns; c++) {
-					board[r,c] = givenArray[r,c];
-					board[r,c].GetComponent<Card>().row = r;
-					board[r,c].GetComponent<Card>().column = c;
+			GameObject[,] newBoard = new GameObject[newRows,newColumns];
+			for(int r = 0; r < oldArray.GetLength(0); r++) {
+				for(int c = 0; c < oldArray.GetLength(1); c++) {
+					newBoard[r,c] = oldArray[r,c];
+					newBoard[r,c].GetComponent<Card>().row = r;
+					newBoard[r,c].GetComponent<Card>().column = c;
 				}
 			}
+			return newBoard;
 		}
 	}
 
@@ -266,9 +276,15 @@ public class CardManager : MonoBehaviour
 	/// <param name="card2">The second gameObject of the match</param>
 	void RemoveMatch(GameObject card1,GameObject card2)
 	{
-		// Deactivates the matched gameObjs
+		// Deactivates the matched gameObjs from the board array
+		sceneBoard[card1.GetComponent<Card>().row,card1.GetComponent<Card>().column].SetActive(false);
+		sceneBoard[card2.GetComponent<Card>().row,card2.GetComponent<Card>().column].SetActive(false);
+
+		// Deactivates and destroys the matched gameObjs from the scene
 		card1.SetActive(false);
 		card2.SetActive(false);
+		Destroy(card1);
+		Destroy(card2);
 
 		// Reverts values
 		selectedGameObj = null;
@@ -286,8 +302,8 @@ public class CardManager : MonoBehaviour
 	{
 		// If the board is empty, it sets isWon to true and
 		// to changes the gameState to the end state
-		if(board.GetLongLength(0) == 0
-			&& board.GetLongLength(1) == 0) {
+		if(sceneBoard.GetLength(0) == 0
+			&& sceneBoard.GetLength(1) == 0) {
 			gameObject.GetComponent<GameManager>().ChangeGameState(GameState.End);
 			gameObject.GetComponent<GameManager>().isWon = true;
 		}

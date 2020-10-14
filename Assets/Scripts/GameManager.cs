@@ -26,8 +26,25 @@ public class GameManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
-    }
+		// Moves the Camera up (W) and down (S)
+		if(Input.GetKey(KeyCode.W))
+			ShiftCamera(Camera.main,new Vector3(0.0f,0.1f,0.0f));
+		else if(Input.GetKey(KeyCode.S))
+			ShiftCamera(Camera.main,new Vector3(0.0f,-0.1f,0.0f));
+
+		switch(currentGameState) {
+			case GameState.MainMenu:
+				break;
+			case GameState.Instructions:
+				break;
+			case GameState.Game:
+				break;
+			case GameState.Pause:
+				break;
+			case GameState.End:
+				break;
+		}
+	}
 
 	public void ChangeGameState(GameState newGameState)
 	{
