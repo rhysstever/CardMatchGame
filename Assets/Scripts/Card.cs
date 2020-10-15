@@ -43,6 +43,6 @@ public class Card : MonoBehaviour
 
     public override string ToString()
     {
-        return value + " of " + type;
+        return "card" + value + "Of" + type;
     }
 }

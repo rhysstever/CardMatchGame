@@ -113,8 +113,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   value: 3
   type: 2
-  row: 4
-  column: 3
+  row: 3
+  column: 2
 --- !u!1 &1973553296507200201
 GameObject:
   m_ObjectHideFlags: 0

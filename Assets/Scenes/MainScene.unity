@@ -329,8 +329,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 84666d0c74c28584496bc36c77f0df1f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rows: 4
-  columns: 4
   deck:
   - {fileID: 1154797527510213602, guid: 5a8eba8547ba8f847bf97c4cd62d4216, type: 3}
   - {fileID: 1154797527510213602, guid: 1beda82005be04041ac4631bd8e409f8, type: 3}
@@ -344,9 +342,12 @@ MonoBehaviour:
   - {fileID: 1154797527510213602, guid: b5da8262a6487674fa0638c158d041a7, type: 3}
   - {fileID: 1154797527510213602, guid: 5a2b579e52192eb4d8d2fe035c46f8dc, type: 3}
   - {fileID: 1154797527510213602, guid: e30afb8d1296e5c469fe475be6df6869, type: 3}
+  numOfCards: 4
+  columns: 2
+  standardFill: 0
+  sceneBoard: []
   selectedGameObj: {fileID: 0}
   prevSelectedGameObj: {fileID: 0}
-  match: 0
   timesDoubled: 0
 --- !u!114 &790147635
 MonoBehaviour:
@@ -361,7 +362,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   currentGameState: 0
-  isWon: 0
 --- !u!4 &790147636
 Transform:
   m_ObjectHideFlags: 0
@@ -391,3 +391,4 @@ MonoBehaviour:
   rowGap: 0.5
   columnGap: 0.5
   brownMat: {fileID: 2100000, guid: 97ce9f33e55d16b46a39ed891496b464, type: 2}
+  parentDisplay: {fileID: 0}

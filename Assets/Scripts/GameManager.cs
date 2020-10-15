@@ -6,6 +6,7 @@ public enum GameState
 {
 	MainMenu,
 	Instructions,
+	Credits,
 	Game,
 	Pause,
 	End
@@ -14,13 +15,11 @@ public enum GameState
 public class GameManager : MonoBehaviour
 {
 	public GameState currentGameState;
-	public bool isWon;
 	
 	// Start is called before the first frame update
     void Start()
     {
 		currentGameState = GameState.Game;
-		isWon = false;
 	}
 
     // Update is called once per frame
@@ -28,14 +27,16 @@ public class GameManager : MonoBehaviour
     {
 		// Moves the Camera up (W) and down (S)
 		if(Input.GetKey(KeyCode.W))
-			ShiftCamera(Camera.main,new Vector3(0.0f,0.1f,0.0f));
+			ShiftCamera(Camera.main,new Vector3(0.0f,0.01f,0.0f));
 		else if(Input.GetKey(KeyCode.S))
-			ShiftCamera(Camera.main,new Vector3(0.0f,-0.1f,0.0f));
+			ShiftCamera(Camera.main,new Vector3(0.0f,-0.01f,0.0f));
 
 		switch(currentGameState) {
 			case GameState.MainMenu:
 				break;
 			case GameState.Instructions:
+				break;
+			case GameState.Credits:
 				break;
 			case GameState.Game:
 				break;
@@ -50,14 +51,22 @@ public class GameManager : MonoBehaviour
 	{
 		switch(newGameState) {
 			case GameState.MainMenu:
+				currentGameState = GameState.MainMenu;
 				break;
 			case GameState.Instructions:
+				currentGameState = GameState.Instructions;
+				break;
+			case GameState.Credits:
+				currentGameState = GameState.Credits;
 				break;
 			case GameState.Game:
+				currentGameState = GameState.Game;
 				break;
 			case GameState.Pause:
+				currentGameState = GameState.Pause;
 				break;
 			case GameState.End:
+				currentGameState = GameState.End;
 				break;
 		}
 	}
