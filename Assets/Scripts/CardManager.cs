@@ -6,157 +6,95 @@ using Random = UnityEngine.Random;
 public class CardManager : MonoBehaviour
 {
 	// Fields set in inspector
-	public int rows;            // # of rows of the board
-	public int columns;         // # of columns of the board
-	public float rowGap;
-	public float columnGap;
 	public GameObject[] deck;   // size of 40, filled with cards of each type and value
-
-	// Materials
-	public Material brownMat;
+	public int numOfCards;      // # of cards on the board
+	public int columns;         // # of columns of the board (# of cards in each row)
+	public bool standardFill;
 
 	// Fields set at Start()
-	public GameObject[,] board;
+	public List<GameObject> sceneBoard;
 	public GameObject selectedGameObj;
 	public GameObject prevSelectedGameObj;
-	public bool match;
-	GameObject boardBG;
-	GameObject cardBoard;
-	float cardWidth;
-	float cardHeight;
+	public int timesDoubled;
+	bool match;
 
 	// Start is called before the first frame update
 	void Start()
 	{
-		board = new GameObject[rows,columns];
+		sceneBoard = new List<GameObject>();
+		timesDoubled = 0;
 		match = false;
 
-		boardBG = GameObject.CreatePrimitive(PrimitiveType.Cube);
-		cardBoard = new GameObject("cards");
-		cardWidth = deck[0].GetComponent<BoxCollider>().size.x;
-		cardHeight = deck[0].GetComponent<BoxCollider>().size.y;
-
-		// if the array has capacity, it is filled and the board is displayed
-		if(rows + columns > 0) 
-		{
-			PopulateCardArray(CreateRandomCardArray(rows,columns));
-			// PopulateCardArray(CreateStandardCardArray(rows, columns)); 
-		
-			DisplayBoard();
-			boardBG.name = "Board";
-			boardBG.GetComponent<MeshRenderer>().material = brownMat;
-		}
+		if(standardFill)
+			AddStandardCards(numOfCards, 0);
+		else
+			AddRandomCards(numOfCards);
 	}
 
 	// Update is called once per frame
 	void Update()
 	{
-		if(Input.GetMouseButtonDown(0)) {
+		// Selects an object with the Left Mouse "Mouse1" click
+		if(Input.GetMouseButtonDown(0))
 			GameObjClicked();
-		}
+
+		// Doubles the board when "R" is pressed
+		if(Input.GetKeyDown(KeyCode.R))
+			DoubleBoard();
 	}
 
 	/// <summary>
-	/// Instantiates card gameObjs and adds them to a board parent object
+	/// Doubles all elements in a 2D array that are still active in the scene
 	/// </summary>
-	void DisplayBoard()
+	void DoubleBoard()
 	{
-		// Loop through board, instantiating each gameObj with a gap
-		for(int r = 0; r < board.GetLength(0); r++) {
-			for(int c = 0; c < board.GetLength(1); c++) {
-				GameObject newGO = Instantiate(
-					board[r,c],
-					new Vector3(
-						c + c * columnGap + cardWidth / 2,
-						r + r * rowGap + cardHeight / 2),
-					Quaternion.identity);
-				newGO.transform.parent = cardBoard.transform;
+		List<GameObject> doubledCards = new List<GameObject>();
+		foreach(GameObject card in sceneBoard) {
+			if(card.activeSelf) {
+				doubledCards.Add(card);
+				numOfCards++;
 			}
 		}
+		sceneBoard.AddRange(doubledCards);
 
-		// Center the cam and board 
-		CenterView();
+		timesDoubled++;
+		gameObject.GetComponent<BoardDisplayManager>().parentDisplay = gameObject.GetComponent<BoardDisplayManager>().DisplayBoard(sceneBoard,"cardBoard" + timesDoubled);
 	}
 
 	/// <summary>
-	/// Centers the board and cam and resizes to be around all of the cards 
+	/// Adds random cards to the list of cards in the scene
 	/// </summary>
-	void CenterView()
+	/// <param name="numOfCardsToAdd">The number of random cards to add</param>
+	void AddRandomCards(int numOfCardsToAdd)
 	{
-		float xOffset = ((columns - 1) * (1 + columnGap) + cardWidth) / 2;
-		float yOffset = ((rows - 1) * (1 + rowGap) + cardHeight) / 2;
-
-		gameObject.GetComponent<GameManager>().ShiftCamera(Camera.main,new Vector3(xOffset,yOffset));
-		boardBG.transform.position = new Vector3(xOffset,yOffset,3);
-		boardBG.transform.localScale = new Vector3(xOffset * 2 + cardWidth,yOffset * 2 + cardHeight,1);
-	}
-
-	/// <summary>
-	/// Fills the card array with strings from another array
-	/// </summary>
-	void PopulateCardArray(GameObject[,] givenArray)
-	{
-		// Checks if the given array is the same size as the card array
-		if(givenArray.GetLength(0) != rows
-			|| givenArray.GetLength(1) != columns) {
-			Debug.Log("Error! Array is the wrong size");
-			return;
-		}
-		else {
-			for(int r = 0; r < rows; r++) {
-				for(int c = 0; c < columns; c++) {
-					board[r,c] = givenArray[r,c];
-					board[r,c].GetComponent<Card>().row = r;
-					board[r,c].GetComponent<Card>().column = c;
-				}
-			}
+		for(int i = 0; i < numOfCardsToAdd; i++) {
+			sceneBoard.Add(deck[Random.Range(0,deck.Length)]);
 		}
 	}
 
 	/// <summary>
-	/// Creates a 2D array of random card gameObjects
+	/// Adds cards to the list of cards in the scene, based on the last card in the list already 
 	/// </summary>
-	/// <param name="rowsAmount">The number of rows in the 2D array</param>
-	/// <param name="columnsAmount">The number of columns in the 2D array</param>
-	/// <returns>Returns a 2D array of gameObjects</returns>
-	GameObject[,] CreateRandomCardArray(int rowsAmount,int columnsAmount)
+	/// <param name="numOfCardsToAdd">The number of cards being added to the scene</param>
+	/// <param name="startingDeckIndex">The starting index of the deck</param>
+	void AddStandardCards(int numOfCardsToAdd, int startingDeckIndex)
 	{
-		// Create empty array
-		GameObject[,] cardArray = new GameObject[rowsAmount,columnsAmount];
-
-		for(int r = 0; r < rowsAmount; r++) {
-			for(int c = 0; c < columnsAmount; c++) {
-				cardArray[r,c] = deck[Random.Range(0,deck.Length)];
-				//Debug.Log(cardArray[r,c].GetComponent<Card>().ToString());
-			}
+		// if the given starting index is more than the deck length, 
+		// the starting index is recalculated to be within the the deck length
+		if(startingDeckIndex > deck.Length) {
+			startingDeckIndex = startingDeckIndex % deck.Length;
 		}
 
-		return cardArray;
-	}
+		int deckIndex = startingDeckIndex;
+		for(int i = 0; i < numOfCardsToAdd; i++) {
+			// Adds the next card in the deck to the list of cards in the scene
+			sceneBoard.Add(deck[deckIndex]);
 
-	/// <summary>
-	/// Creates a 2D array of card gameObjects, in order of a card deck
-	/// </summary>
-	/// <param name="rowsAmount">The number of rows in the 2D array</param>
-	/// <param name="columnsAmount">The number of columns in the 2D array</param>
-	/// <returns>Returns a 2D array of gameObjects</returns>
-	GameObject[,] CreateStandardCardArray(int rowsAmount,int columnsAmount)
-	{
-		GameObject[,] cardArray = new GameObject[rowsAmount,columnsAmount];
-		int cardCount = 0;
-
-		for(int r = 0; r < rowsAmount; r++) {
-			for(int c = 0; c < columnsAmount; c++) {
-				cardArray[r,c] = deck[cardCount];
-				//Debug.Log(cardArray[r,c].GetComponent<Card>().ToString());
-
-				cardCount++;
-				if(cardCount == deck.Length)
-					cardCount = 0;
-			}
+			// Resets the deckIndex if it hits the end of the deck
+			deckIndex++;
+			if(deckIndex == deck.Length)
+				deckIndex = 0;
 		}
-
-		return cardArray;
 	}
 
 	/// <summary>
@@ -266,7 +204,13 @@ public class CardManager : MonoBehaviour
 	/// <param name="card2">The second gameObject of the match</param>
 	void RemoveMatch(GameObject card1,GameObject card2)
 	{
-		// Deactivates the matched gameObjs
+		// Deactivates the matched gameObjs from the board array
+		foreach(GameObject childCard in sceneBoard) {
+			if(childCard == card1 || childCard == card2)
+				childCard.SetActive(false);
+		}
+
+		// Deactivates and destroys the matched gameObjs from the scene
 		card1.SetActive(false);
 		card2.SetActive(false);
 
@@ -275,21 +219,6 @@ public class CardManager : MonoBehaviour
 		prevSelectedGameObj = null;
 		match = false;
 
-		// Check for end of game
-		CheckVictory();
-	}
-
-	/// <summary>
-	/// If the board has been cleared, the game state to the end state
-	/// </summary>
-	void CheckVictory()
-	{
-		// If the board is empty, it sets isWon to true and
-		// to changes the gameState to the end state
-		if(board.GetLongLength(0) == 0
-			&& board.GetLongLength(1) == 0) {
-			gameObject.GetComponent<GameManager>().ChangeGameState(GameState.End);
-			gameObject.GetComponent<GameManager>().isWon = true;
-		}
+		gameObject.GetComponent<BoardDisplayManager>().CheckEndOfGame();
 	}
 }
