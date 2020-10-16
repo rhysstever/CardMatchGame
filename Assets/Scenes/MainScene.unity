@@ -344,8 +344,7 @@ MonoBehaviour:
   - {fileID: 1154797527510213602, guid: e30afb8d1296e5c469fe475be6df6869, type: 3}
   numOfCards: 20
   columns: 8
-  standardFill: 1
-  sceneBoard: []
+  standardFill: 0
   selectedGameObj: {fileID: 0}
   prevSelectedGameObj: {fileID: 0}
   timesDoubled: 0

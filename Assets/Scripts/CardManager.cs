@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -12,7 +13,8 @@ public class CardManager : MonoBehaviour
 	public bool standardFill;
 
 	// Fields set at Start()
-	public List<GameObject> sceneBoard;
+	//public List<GameObject> sceneBoard;
+	public List<Card> cards;
 	public GameObject selectedGameObj;
 	public GameObject prevSelectedGameObj;
 	public int timesDoubled;
@@ -21,7 +23,8 @@ public class CardManager : MonoBehaviour
 	// Start is called before the first frame update
 	void Start()
 	{
-		sceneBoard = new List<GameObject>();
+		//sceneBoard = new List<GameObject>();
+		cards = new List<Card>();
 		timesDoubled = 0;
 		match = false;
 
@@ -43,33 +46,49 @@ public class CardManager : MonoBehaviour
 			DoubleBoard();
 	}
 
+	public GameObject CardToGameObj(Card card)
+	{
+		string gameObjName = "Card" + card.Type + (int)card.Value;
+		int deckIndex = 0;
+		for(int i = 0; i < gameObject.GetComponent<CardManager>().deck.Length; i++)
+		{
+			if(gameObject.GetComponent<CardManager>().deck[i].name.Equals(gameObjName))
+				deckIndex = i;
+		}
+		return deck[deckIndex];
+	}
+
+	public Card GameObjToCard(GameObject cardGameObj)
+	{
+		foreach(Card card in cards)
+		{
+			// fix
+			if(cardGameObj.name.Contains(card.Type.ToString())
+				&& cardGameObj.name.Contains(((int)card.Value).ToString()))
+				return card;
+		}
+
+		return null;
+	}
+
 	/// <summary>
 	/// Doubles all active cards in the scene
 	/// </summary>
 	void DoubleBoard()
 	{
 		//// Finds all active cards in the scene and "doubles" them 
-		//List<GameObject> doubledCards = new List<GameObject>();\
-		int count = sceneBoard.Count;
+		int count = cards.Count;
 		for(int i = 0; i < count; i++) {
-			if(sceneBoard[i].activeSelf) {
-				GameObject newCard = Instantiate(sceneBoard[i]);
-				//doubledCards.Add(newCard);
-				//newCard.SetActive(false);
-				sceneBoard.Add(sceneBoard[i]);
+			if(cards[i].IsActive) {
+				cards.Add(new Card(cards[i].Value, cards[i].Type));
 				numOfCards++;
 			}
 		}
-		//sceneBoard.AddRange(doubledCards);
 
 		timesDoubled++;
 		// Displays a new board with the "doubled" cards
 		gameObject.GetComponent<BoardDisplayManager>().parentDisplay 
-			= gameObject.GetComponent<BoardDisplayManager>().DisplayBoard(sceneBoard,"cardBoard" + timesDoubled);
-
-		//// Deletes the newly created "temp" cards and clears the list
-		//foreach(GameObject card in doubledCards)
-		//	Destroy(card);
+			= gameObject.GetComponent<BoardDisplayManager>().DisplayBoard(cards,"cardBoard" + timesDoubled);
 	}
 
 	/// <summary>
@@ -79,7 +98,8 @@ public class CardManager : MonoBehaviour
 	void AddRandomCards(int numOfCardsToAdd)
 	{
 		for(int i = 0; i < numOfCardsToAdd; i++) {
-			sceneBoard.Add(deck[Random.Range(0,deck.Length)]);
+			cards.Add(new Card(Random.Range(0, Enum.GetNames(typeof(CardValue)).Length),
+				Random.Range(0, Enum.GetNames(typeof(CardType)).Length)));
 		}
 	}
 
@@ -99,7 +119,8 @@ public class CardManager : MonoBehaviour
 		int deckIndex = startingDeckIndex;
 		for(int i = 0; i < numOfCardsToAdd; i++) {
 			// Adds the next card in the deck to the list of cards in the scene
-			sceneBoard.Add(deck[deckIndex]);
+			// sceneBoard.Add(deck[deckIndex]);
+			Debug.Log("Needs implementation");
 
 			// Resets the deckIndex if it hits the end of the deck
 			deckIndex++;
@@ -130,7 +151,7 @@ public class CardManager : MonoBehaviour
 
 			// If the clicked gameObj has a parent, then the 
 			// parent becomes the selected gameObj
-			if(hitGameObj.transform.parent.GetComponent<Card>() != null)
+			if(hitGameObj.transform.parent.tag == "Card")
 				hitGameObj = hitGameObj.transform.parent.gameObject;
 
 			// If a selected gameObj already exists, 
@@ -158,15 +179,23 @@ public class CardManager : MonoBehaviour
 		if(selectedGameObj != null
 			&& prevSelectedGameObj != null
 			&& !match)
-			if(isMatch(selectedGameObj,prevSelectedGameObj)) {
+		{
+			Card card1 = GameObjToCard(selectedGameObj);
+			Card card2 = GameObjToCard(prevSelectedGameObj);
+			if(card1 != null
+				&& card2 != null
+				&& isMatch(card1, card2))
+			{
 				match = true;
-				RemoveMatch(selectedGameObj,prevSelectedGameObj);
+				RemoveMatch(card1, card2);
 			}
-			else {
+			else
+			{
 				match = false;
 				prevSelectedGameObj = null;
 				selectedGameObj = null;
 			}
+		}
 	}
 
 	/// <summary>
@@ -176,31 +205,24 @@ public class CardManager : MonoBehaviour
 	/// <param name="card1">The first gameObj being compared</param>
 	/// <param name="card2">The second gameObj being compared</param>
 	/// <returns>Returns whether the 2 cards are a match</returns>
-	bool isMatch(GameObject card1,GameObject card2)
+	bool isMatch(Card card1,Card card2)
 	{
-		// Checks that both gameObjects are cards
-		if(card1.GetComponent<Card>() == null
-			|| card2.GetComponent<Card>() == null) {
-			Debug.Log("These are not cards");
-			return false;
-		}
-
 		// Checks that both gameObjects are unique
-		if(card1 == card2) { 
+		if(card1.Equals(card2)) { 
 			Debug.Log("These are the same object");
 			return false;
 		}	
 
 		// Check the type of each card
-		if(card1.GetComponent<Card>().type
-			!= card2.GetComponent<Card>().type) {
+		if(card1.Type
+			!= card2.Type) {
 			Debug.Log("Wrong type");
 			return false;
 		}
 
 		// Check the values each of card
-		if(card1.GetComponent<Card>().value
-			!= card2.GetComponent<Card>().value) {
+		if(card1.Value
+			!= card2.Value) {
 			Debug.Log("Not the same value");
 			return false;
 		}
@@ -213,17 +235,17 @@ public class CardManager : MonoBehaviour
 	/// </summary>
 	/// <param name="card1">The first gameObejct of the match</param>
 	/// <param name="card2">The second gameObject of the match</param>
-	void RemoveMatch(GameObject card1,GameObject card2)
+	void RemoveMatch(Card card1, Card card2)
 	{
 		// Deactivates the matched gameObjs from the board array
-		foreach(GameObject childCard in sceneBoard) {
-			if(childCard == card1 || childCard == card2)
-				childCard.SetActive(false);
+		foreach(Card card in cards) {
+			if(card == card1 || card == card2)
+				card.IsActive = false;
 		}
 
 		// Deactivates and destroys the matched gameObjs from the scene
-		card1.SetActive(false);
-		card2.SetActive(false);
+		card1.IsActive = false;
+		card2.IsActive = false;
 
 		// Reverts values
 		selectedGameObj = null;

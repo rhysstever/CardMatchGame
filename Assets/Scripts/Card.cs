@@ -19,28 +19,63 @@ public enum CardValue
     Three
 }
 
-public class Card : MonoBehaviour
+public class Card
 {
-    // Fields set in inspector
-    public CardValue value;
-    public CardType type;
+	// Fields
+	private CardValue value;
+    private CardType type;
+    private int row;
+    private int column;
+	private bool isActive;
 
+	// Properties
+	public CardValue Value { get { return value; } }
+	public CardType Type { get { return type; } }
+	public int Row
+	{
+		get { return row; }
+		set { row = value; }
+	}
+	public int Column
+	{
+		get { return column; }
+		set { column = value; }
+	}
+	public bool IsActive
+	{
+		get { return isActive; }
+		set { isActive = value; }
+	}
 
-    public int row;
-    public int column;
+	// Constructors
+	/// <summary>
+	/// Creates a Card object by the given indexes for each field
+	/// </summary>
+	/// <param name="valueIndex">The index for the value enum</param>
+	/// <param name="typeIndex">The index for the type enum</param>
+	public Card(int valueIndex, int typeIndex)
+	{
+		value = (CardValue)valueIndex;
+		type = (CardType)typeIndex;
+		row = 0;
+		column = 0;
+		isActive = true;
+	}
+	/// <summary>
+	/// Creates a Card object by the given enum values
+	/// </summary>
+	/// <param name="value">The value of the card</param>
+	/// <param name="type">The type of the card</param>
+	public Card(CardValue value, CardType type)
+	{
+		this.value = value;
+		this.type = type;
+		row = 0;
+		column = 0;
+		isActive = true;
+	}
 
-    // Start is called before the first frame update
-    void Start()
-    {
-
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
-
+	// Methods
     public override string ToString()
     {
         return "card" + value + "Of" + type;

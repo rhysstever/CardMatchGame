@@ -35,8 +35,8 @@ public class BoardDisplayManager : MonoBehaviour
         cardWidth = gameObject.GetComponent<CardManager>().deck[0].GetComponent<BoxCollider>().size.x;
         cardHeight = gameObject.GetComponent<CardManager>().deck[0].GetComponent<BoxCollider>().size.y;
 
-        if(gameObject.GetComponent<CardManager>().sceneBoard != null)
-            parentDisplay = DisplayBoard(gameObject.GetComponent<CardManager>().sceneBoard,
+        if(gameObject.GetComponent<CardManager>().cards.Count > 0)
+            parentDisplay = DisplayBoard(gameObject.GetComponent<CardManager>().cards,
                 "cardBoard" + gameObject.GetComponent<CardManager>().timesDoubled);
     }
 
@@ -49,11 +49,11 @@ public class BoardDisplayManager : MonoBehaviour
     /// <summary>
     /// Instantiates card gameObjs and adds them to a board parent object
     /// </summary>
-    /// <param name="board">The 2D array of GameObjs that are being created in the scene</param>
+    /// <param name="cards">The 2D array of GameObjs that are being created in the scene</param>
     /// <param name="emptyParentObjectName">The name of the new parent object that will 
     /// be created to hold all created GameObjs</param>
     /// <returns>Returns the empty gameObj that is the parent of all the displayed cards</returns>
-    public GameObject DisplayBoard(List<GameObject> board,string emptyParentObjectName)
+    public GameObject DisplayBoard(List<Card> cards,string emptyParentObjectName)
     {
 		// New empty parent gameObj to hold all of the child card gameObjs
         GameObject newDisplay = new GameObject(emptyParentObjectName);
@@ -61,16 +61,20 @@ public class BoardDisplayManager : MonoBehaviour
 		// Loops thr the board and instantiates each card object
         int c = 0;
         int r = 0;
-        foreach(GameObject card in board) {
-            GameObject newCard = Instantiate(
-                card,
+        foreach(Card card in cards) {
+			// Creates the new card gameObj in the scene
+			GameObject newCard = Instantiate(
+				gameObject.GetComponent<CardManager>().CardToGameObj(card),
                 new Vector3(
                     c + c * columnGap + cardWidth / 2,
                     -r - r * rowGap - cardHeight / 2),
                 Quaternion.identity,newDisplay.transform);
-            newCard.name = card.GetComponent<Card>().ToString();
+            newCard.name = card.ToString();
+			card.Column = c;
+			card.Row = r;
             newCard.SetActive(true);
 
+			// Incrementing for grid layout
             c++;
             if(c == columns) {
                 c = 0;

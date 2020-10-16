@@ -25,12 +25,6 @@ public class GameManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-		// Moves the Camera up (W) and down (S)
-		if(Input.GetKey(KeyCode.W))
-			ShiftCamera(Camera.main,new Vector3(0.0f,0.01f,0.0f));
-		else if(Input.GetKey(KeyCode.S))
-			ShiftCamera(Camera.main,new Vector3(0.0f,-0.01f,0.0f));
-
 		switch(currentGameState) {
 			case GameState.MainMenu:
 				break;
@@ -45,6 +39,15 @@ public class GameManager : MonoBehaviour
 			case GameState.End:
 				break;
 		}
+	}
+
+	void FixedUpdate()
+	{
+		// Moves the Camera up (W) and down (S)
+		if(Input.GetKey(KeyCode.W))
+			ShiftCamera(Camera.main, new Vector3(0.0f, 0.1f, 0.0f));
+		else if(Input.GetKey(KeyCode.S))
+			ShiftCamera(Camera.main, new Vector3(0.0f, -0.1f, 0.0f));
 	}
 
 	public void ChangeGameState(GameState newGameState)
