@@ -55,8 +55,10 @@ public class BoardDisplayManager : MonoBehaviour
     /// <returns>Returns the empty gameObj that is the parent of all the displayed cards</returns>
     public GameObject DisplayBoard(List<GameObject> board,string emptyParentObjectName)
     {
+		// New empty parent gameObj to hold all of the child card gameObjs
         GameObject newDisplay = new GameObject(emptyParentObjectName);
 
+		// Loops thr the board and instantiates each card object
         int c = 0;
         int r = 0;
         foreach(GameObject card in board) {
@@ -75,10 +77,11 @@ public class BoardDisplayManager : MonoBehaviour
                 r++;
 			}
         }
+		// Sets the new row value
+		rows = r;
 
-		if(gameObject.GetComponent<CardManager>().timesDoubled == 0)
-            CenterView();
-		else {
+		// If the board is being doubled, then old boards are deleted
+		if(gameObject.GetComponent<CardManager>().timesDoubled > 0) {
             for(int i = gameObject.GetComponent<CardManager>().timesDoubled - 1; i >= 0; i--) {
                 GameObject oldBoard = GameObject.Find("cardBoard" + i);
                 if(oldBoard != null)
@@ -86,7 +89,9 @@ public class BoardDisplayManager : MonoBehaviour
             }
 		}
 
-        return newDisplay;
+		CenterView();
+
+		return newDisplay;
     }
 
     /// <summary>
@@ -98,11 +103,12 @@ public class BoardDisplayManager : MonoBehaviour
         float xOffset = ((columns - 1) * (1 + columnGap) + cardWidth) / 2;
         float yOffset = ((rows - 1) * (1 + rowGap) + cardHeight) / 2;
 
-        // Repositions the camera and background object based on offsets
-        gameObject.GetComponent<GameManager>().ShiftCamera(Camera.main,new Vector3(xOffset,-yOffset));
-        boardBG.transform.position = new Vector3(xOffset,-yOffset,3.0f);
+		// Repositions the camera based on offsets if this is the first time the board is being displayed
+		if(gameObject.GetComponent<CardManager>().timesDoubled == 0)
+			gameObject.GetComponent<GameManager>().ShiftCamera(Camera.main,new Vector3(xOffset,-yOffset));
 
-        // Resizes background object
+        // Resizes and repositions background object
+        boardBG.transform.position = new Vector3(xOffset,-yOffset,3.0f);
         boardBG.transform.localScale = new Vector3(xOffset * 2 + cardWidth,yOffset * 2 + cardHeight,1);
     }
 

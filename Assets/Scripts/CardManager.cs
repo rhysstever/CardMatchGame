@@ -48,17 +48,25 @@ public class CardManager : MonoBehaviour
 	/// </summary>
 	void DoubleBoard()
 	{
+		// Finds all active cards in the scene and "doubles" them 
 		List<GameObject> doubledCards = new List<GameObject>();
 		foreach(GameObject card in sceneBoard) {
 			if(card.activeSelf) {
-				doubledCards.Add(card);
+				GameObject newCard = Instantiate(card);
+				doubledCards.Add(newCard);
+				newCard.SetActive(false);
 				numOfCards++;
 			}
 		}
 		sceneBoard.AddRange(doubledCards);
 
 		timesDoubled++;
+		// Displays a new board with the "doubled" cards
 		gameObject.GetComponent<BoardDisplayManager>().parentDisplay = gameObject.GetComponent<BoardDisplayManager>().DisplayBoard(sceneBoard,"cardBoard" + timesDoubled);
+
+		// Deletes the newly created "temp" cards
+		foreach(GameObject card in doubledCards)
+			Destroy(card);
 	}
 
 	/// <summary>
