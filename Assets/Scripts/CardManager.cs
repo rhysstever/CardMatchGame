@@ -44,29 +44,32 @@ public class CardManager : MonoBehaviour
 	}
 
 	/// <summary>
-	/// Doubles all elements in a 2D array that are still active in the scene
+	/// Doubles all active cards in the scene
 	/// </summary>
 	void DoubleBoard()
 	{
-		// Finds all active cards in the scene and "doubles" them 
-		List<GameObject> doubledCards = new List<GameObject>();
-		foreach(GameObject card in sceneBoard) {
-			if(card.activeSelf) {
-				GameObject newCard = Instantiate(card);
-				doubledCards.Add(newCard);
-				newCard.SetActive(false);
+		//// Finds all active cards in the scene and "doubles" them 
+		//List<GameObject> doubledCards = new List<GameObject>();\
+		int count = sceneBoard.Count;
+		for(int i = 0; i < count; i++) {
+			if(sceneBoard[i].activeSelf) {
+				GameObject newCard = Instantiate(sceneBoard[i]);
+				//doubledCards.Add(newCard);
+				//newCard.SetActive(false);
+				sceneBoard.Add(sceneBoard[i]);
 				numOfCards++;
 			}
 		}
-		sceneBoard.AddRange(doubledCards);
+		//sceneBoard.AddRange(doubledCards);
 
 		timesDoubled++;
 		// Displays a new board with the "doubled" cards
-		gameObject.GetComponent<BoardDisplayManager>().parentDisplay = gameObject.GetComponent<BoardDisplayManager>().DisplayBoard(sceneBoard,"cardBoard" + timesDoubled);
+		gameObject.GetComponent<BoardDisplayManager>().parentDisplay 
+			= gameObject.GetComponent<BoardDisplayManager>().DisplayBoard(sceneBoard,"cardBoard" + timesDoubled);
 
-		// Deletes the newly created "temp" cards
-		foreach(GameObject card in doubledCards)
-			Destroy(card);
+		//// Deletes the newly created "temp" cards and clears the list
+		//foreach(GameObject card in doubledCards)
+		//	Destroy(card);
 	}
 
 	/// <summary>
